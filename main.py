@@ -2,7 +2,6 @@ import yaml
 import requests
 import time
 import json
-import threading
 import asyncio
 import aiohttp
 from collections import defaultdict
@@ -41,11 +40,6 @@ async def check_health(endpoint):
             async with session.request(method, url, headers=headers, json=body) as response:
                 end_time = time.perf_counter()
                 response_time = (end_time - start_time) * 1000
-                print(endpoint.get('name'))
-                print(f"{method} ON {url}")
-                print(response.status)
-                print(f"response time: {response_time}ms")
-                print()
                 if 200 <= response.status < 300 and response_time <= 500:
                     return (domain, "UP")
                 else:
@@ -56,16 +50,7 @@ async def check_health(endpoint):
 # Main function to monitor endpoints
 async def monitor_endpoints(file_path):
     endpoints = load_config(file_path)
-    print("THE CONFIG FILE")
-    print(endpoints)
-    for i in range(len(endpoints)):
-        print(i + 1)
-        print(endpoints[i])
     domain_stats = defaultdict(lambda: {"up": 0, "total": 0})
-
-
-    print("DOMAIN_STATS: ")
-    print(dict(domain_stats))
 
     while True:
         # the following should always be executed every 15s
@@ -74,11 +59,7 @@ async def monitor_endpoints(file_path):
 
         for response in responses:
             domain = response[0]
-            print("domain = response[0]")
-            print(domain)
             status = response[1]
-            print("status = response[1]")
-            print(status)
 
             async with lock:
                 domain_stats[domain]["total"] += 1
